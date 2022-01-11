@@ -51,39 +51,3 @@ class tf_idf:
         orderdic = sorted(outdic.items(), key=operator.itemgetter(
             1), reverse=True)  # 给字典排序
         return orderdic
-
-
-# def befwry(lis):  # 写入预处理，将list转为string
-#     outall = ''
-#     for i in lis:
-#         ech = str(i).replace("('", '').replace("',", '\t').replace(')', '')
-#         outall = outall+'\t'+ech+'\n'
-#     return outall
-
-
-# def main():
-#     swpath = r'哈工大停用词表.txt'#停用词表路径
-#     swlist = getstopword(swpath)  # 获取停用词表列表
-
-#     filepath = r'corpus'
-#     filelist = fun(filepath)  # 获取文件列表
-
-#     wrypath = r'TFIDF.txt'
-
-#     corpuslist = corpus(filelist, swlist)  # 建立语料库
-
-#     outall = ''
-
-#     for i in filelist:
-#         afterswlis = getridofsw(toword(read(str(i))), swlist)  # 获取每一篇已经去除停用的词表
-#         tfidfdic = tf_idf(afterswlis, filelist, corpuslist)  # 计算TF-IDF
-
-#         titleary = str(i).split('\\')
-#         title = str(titleary[-1]).replace('utf8.txt', '')
-#         echout = title+'\n'+befwry(tfidfdic)
-#         print(title+' is ok!')
-#         outall = outall+echout
-#     print(wry(outall, wrypath)+' is ok!')
-
-# if __name__ == '__main__':
-#     main()
