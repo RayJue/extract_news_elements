@@ -4,7 +4,7 @@
 from gensim.models import word2vec
 from read_excel import get_news
 from get_corpus import Corpus
-from tfidf import tf_idf
+# from tfidf import tf_idf
 # import jieba
 
 news = get_news()
@@ -12,7 +12,7 @@ titles,contents = news.titles_texts()
 
 stop_path = '/home/rayjue/extract_news/stop_words.txt'
 cor = Corpus(stop_path)
-tfidf = tf_idf()
+# tfidf = tf_idf()
 
 cor.write_corpus(contents)
  
