@@ -38,17 +38,39 @@ class Corpus:
             afterswlis = self.getridofsw(self.toword(i), swlist)
             alllist.append(afterswlis)
         return alllist
+    
+    # def pec_sent(self,filelist, swlist):
 
+
+    def corpus_st(self,filelist, swlist):  # 建立语料库
+        alllist = []
+        pec_all = []
+        for i in filelist:
+            afterswlis = self.getridofsw(self.toword(i), swlist)
+            pec_all.append((len(i)-len(afterswlis))/len(afterswlis))
+            alllist.append(afterswlis)
+        return alllist,pec_all
+    
 
     def preprocess(self,filelist):
 
         # swpath = self.stop_path
         swlist = self.getstopword()  # 获取停用词表列表
 
-        corpuslist = self.corpus(filelist, swlist)  # 建立语料库
+        corpuslist,pec = self.corpus(filelist, swlist)  # 建立语料库
         
 
         return corpuslist
+
+    def preprocess_st(self,filelist):
+
+        # swpath = self.stop_path
+        swlist = self.getstopword()  # 获取停用词表列表
+
+        corpuslist,pec = self.corpus_st(filelist, swlist)  # 建立语料库
+        
+
+        return corpuslist,pec
     
     # def build_corpus(self,corpuslist):
 
