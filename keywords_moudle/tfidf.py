@@ -38,6 +38,7 @@ class tf_idf:
 
     def tf_idf(self,wordlis, len_filelist, corpuslist):  # 计算TF-IDF,并返回字典
         outdic = {}
+        
         tf = 0
         idf = 0
         dic = self.freqword(wordlis)
@@ -51,3 +52,21 @@ class tf_idf:
         orderdic = sorted(outdic.items(), key=operator.itemgetter(
             1), reverse=True)  # 给字典排序
         return orderdic
+    
+    def tf_idf_sf(self,wordlis, len_filelist, corpuslist):  # 计算TF-IDF,并返回字典
+        outdic = {}
+        score_avg = 0
+        tf = 0
+        idf = 0
+        dic = self.freqword(wordlis)
+        outlis = []
+        for i in set(wordlis):
+            tf = dic[str(i)]/len(wordlis)  # 计算TF：某个词在文章中出现的次数/文章总词数
+            # 计算IDF：log(语料库的文档总数/(包含该词的文档数+1))
+            idf = math.log(len_filelist/(self.wordinfilecount(str(i), corpuslist)+1))
+            tfidf = tf*idf  # 计算TF-IDF
+            outdic[str(i)] = tfidf
+            score_avg +=tfidf
+        orderdic = sorted(outdic.items(), key=operator.itemgetter(
+            1), reverse=True)  # 给字典排序
+        return orderdic,score_avg/len(wordlis)
