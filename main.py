@@ -7,113 +7,44 @@ from heapq import nlargest
 from itertools import product, count
 from keywords_moudle.tfidf import tf_idf
 from keywords_moudle.use_w2v import sim
-from keysentence_moudle.textrank_extract import comparion,textrank_sort
+from keysentence_moudle.textrank import TextRank
 from keyinfo_extract_moudle.LTP_extract import Extract_elements
-# from read_excel import get_news
+from keysentence_moudle.judge import elements
+from keysentence_moudle.utils import use_expand,compute_similarity_by_avg
+from keyinfo_extract_moudle.analysis import LTP_Analysis
 import jieba
+from ltp import LTP
 from utils import cosine_similarity
-
-# from tfidf import tf_idf
+ltp = LTP()
+nlp = LTP_Analysis()
 news = get_news()
 titles,contents = news.titles_texts()
 model = word2vec.Word2Vec.load('/home/rayjue/extract_news/news.model')
-
 stop_path = '/home/rayjue/extract_news/stop_words.txt'
 cor = Corpus(stop_path)
-# tfidf = tf_idf()
-
-compare = comparion()
-textrank = textrank_sort()
 get_sim = sim()
-
-
 corpus,pec = cor.preprocess_st(contents)
-
-
-def use_expand(title_):
-    expand_title = []
-    title = jieba.lcut(title_)
-    for i in title:
-        try:
-            expand_title.append(i)
-            sim = model.most_similar(i, topn=2)
-            for key in sim:
-                expand_title.append(key[0])
-        except:
-            print(' 训练语料未发现该词语')
-            expand_title = title
-    return expand_title
-
-def compute_similarity_by_avg(sents_1, sents_2):
-
-        vec1 = 0.0
-        vec2 = 0.0
-        if len(sents_1) == 0 or len(sents_2) == 0:
-            return 0.0
-       
-        for word1 in sents_1:
-            if word1 in model:
-                vec1 = vec1 + model[word1]
-            else:
-                vec1 += model['没有']
-            
-        for word2 in sents_2:
-            if word2 in model:
-                vec2 = vec2 + model[word2]
-            else:
-                vec2 += model['没有']
-        
-            similarity = cosine_similarity(vec1 / len(sents_1), vec2 / len(sents_2))
-
-        return similarity
 tf = tf_idf()
-ext = Extract_elements()
+ext = Extract_elements(nlp,ltp)
+element = elements(get_sim,tf)
 import heapq
 for item in corpus:
     index = corpus.index(item)
-    len_sent = contents[index]
-    expand_title = use_expand(titles[index])
-    sents = textrank.filter_model(item.split('。'))
-    _,stop_pec = cor.corpus_st(sents,cor.getstopword())
+    len_sent = len(contents[index])
+    expand_title = use_expand(model,titles[index])
+    sents = ''.join(item).split('。')
+    _,stop_pec = cor.corpus_st(item,cor.getstopword())
 
-    def sim_with_title(expand_title,sents):
-
-        return get_sim.compute_similarity_by_avg(expand_title,sents)
-
-    
-
-    def get_text_rank(sents):
-        graph = compare.create_graph(sents)
-
-        scores = textrank.weight_sentences_rank(graph)
-        sent_selected = nlargest(len(sents), zip(scores, count()))
-        sent_index = []
-        for i in range(5):
-                sent_index.append(sent_selected[i])
-                print(sent_selected[i])
-        return {sents[i[1]]:sents[i[0]] for i in sent_index}
-    ranked_sentence = get_text_rank(sents)
-
-    def get_tfidf_rank(sents):
-
-        
-        _,avg =  tf.tf_idf_sf(sents, len(contents),corpus)
-
-        return avg
-
-    tfidf_sentence = get_text_rank(sents)
-
-
-
+    ranked_sentence = element.get_text_rank(''.join(item))
+    tfidf_sentence = element.get_tfidf_rank(sents,contents,corpus)
 
     sort1 = []
     sort2 = []
     for line in sents:
-        line_index = item.index(line)
-
-        elements_1 = 0.1*len_sent,0.5*stop_pec,1*sim_with_title(line,titles[index]),1*ranked_sentence[line]
-
-        elements_2 = 0.1*len_sent,0.5*stop_pec,1*sim_with_title(line,titles[index]),1*tfidf_sentence[line]
+        line_index = sents.index(line)
+        
+        elements_1 = 0.1*len_sent+5*stop_pec[line_index]+1*element.sim_with_title(titles[index],line)+100*ranked_sentence[line_index]
+        elements_2 = 0.1*len_sent+5*stop_pec[line_index]+1*element.sim_with_title(titles[index],line)+100*tfidf_sentence[line_index]
 
         sort1.append(elements_1)
         sort2.append(elements_2)
@@ -123,25 +54,6 @@ for item in corpus:
         print(ext.cal_elements(sents[a]))
     
     for a in map(sort2.index, heapq.nlargest(3, sort2)):
-        print("avg-tfidf"+sents[a])
+        print("tfidf:"+sents[a])
         print(ext.cal_elements(sents[a]))
-
-    
-
-
-
-    
-
-    
-    
-
-
-    
-
-
-
-
-
-
-
-
+    break
